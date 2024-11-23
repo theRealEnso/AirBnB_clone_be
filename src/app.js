@@ -42,4 +42,22 @@ app.use(compression());
 //cors
 app.use(cors());
 
+//  *** error handling middleware ***   //
+app.use(async (req, res, next) => {
+    next(createHttpError.NotFound("This route does not exist!"));
+});
+
+
+app.use(async (error, req, res, next) => {
+    res.status(error.status || 500);
+    res.send({
+        error: {
+            //errors have status and message properties
+            status: error.status || 500,
+            message: error.message,
+        }
+    });
+});
+
+
 export default app;
