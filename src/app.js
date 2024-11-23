@@ -8,6 +8,9 @@ import compression from "compression"; // compresses response bodies for all inc
 import cors from "cors"; // this restricts who can access the server
 import createHttpError from "http-errors";
 
+//import aggregated routes from the index route
+import routes from "./routes/index.js"
+
 //dotEnv config
 dotenv.config();
 
@@ -39,8 +42,12 @@ app.use(cookieParser());
 //use compression package to compress data from incoming user requests
 app.use(compression());
 
-//cors
+//cors middelware
 app.use(cors());
+
+
+//middleware to define our API endpoints
+app.use("/api/v1", routes);
 
 //  *** error handling middleware ***   //
 app.use(async (req, res, next) => {

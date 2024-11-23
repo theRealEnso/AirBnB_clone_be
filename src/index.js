@@ -1,10 +1,35 @@
 import app from "./app.js";
 import logger from "./configs/winston-logger.js";
+import mongoose from "mongoose"
 
 //env variables
 const PORT = process.env.port || 5000;
-console.log(process.env.NODE_ENV);
+const {DATABASE_URL} = process.env;
 
+//enable mongoDB debug mode for development
+if(process.env.NODE_ENV !== "production"){
+    mongoose.set("debug", true);
+};
+
+
+//establish mongoDB connection
+const connectToDB = async () => {
+    try {
+        if(!process.env.DATABASE_URL){
+            logger.error(`'DATABASE_URL' environnment variable is missing or undefined!`)
+        }
+        await mongoose.connect(DATABASE_URL);
+        logger.info(`Connected to MongoDB cloud database!`)
+    } catch(error) {
+        logger.error(`Error connecting to MongoDB! :${error}`);
+        process.exit(1);
+    }
+};
+
+connectToDB();
+
+
+//starting the server
 let server;
 
 server = app.listen(PORT, () => {
