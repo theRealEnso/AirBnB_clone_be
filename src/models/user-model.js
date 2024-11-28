@@ -1,5 +1,10 @@
+//import packages
 import mongoose from "mongoose";
 import validator from "validator";
+import bcrypt from "bcrypt";
+
+//import custom winston logger
+import logger from "../configs/winston-logger.js";
 
 const {Schema} = mongoose;
 
@@ -52,5 +57,25 @@ const userSchema = new Schema({
     },
 
 }, {collection: "users", timestamps: true,});
+
+//use bcrypt to hash user password before saving new user document to the database
+userSchema.pre("save", async function(next){
+    try {
+        if(this.$isNew){
+            const userPassword = this.password;
+            const saltRounds = 12;
+            const salt = await bcrypt.genSalt(saltRounds);
+            const hashedPassword = await bcrypt.hash(userPassword, salt);
+
+            this.password = hashedPassword;
+            this.confirmPassword = hashedPassword;
+        }
+
+        next();
+
+    } catch(error){
+        next(error);
+    };
+});
 
 export const UserModel = mongoose.models.UserModel || mongoose.model("UserModel", userSchema);
