@@ -6,7 +6,7 @@ import { UserModel } from "../models/user-model.js";
 
 //import utility functions
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter.js";
-import { createUserAndAddToDB } from "../services/authentification-services.js";
+import { createUserAndAddToDB, signInUser } from "../services/authentification-services.js";
 import { generateToken } from "../utils/generate-tokens.js";
 
 export const register = async (req, res, next) => {
@@ -58,6 +58,35 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
     try {
+        const {email, password} = req.body;
+        const verifiedUser = await signInUser(email, password);
+
+        console.log(verifiedUser);
+
+        //generate access token
+        const accessToken = await generateToken({id: verifiedUser._id}, process.env.SECRET_ACCESS_TOKEN, "1d");
+
+        //generate refresh token
+        const refreshToken = await generateToken({id: verifiedUser._id}, process.env.SECRET_REFRESH_TOKEN, "30d");
+
+        //store refresh token as cookie on the server
+        res.cookie("refresh_token", refreshToken, {
+            httpOnly: true,
+            maxAge: 30 * 24 * 60 * 60 * 1000,
+            secure: process.env.NODE_ENV === "production"
+        })
+
+        //send back user object to the front end
+        res.json({
+            message: "User successfully signed in!",
+            user: {
+                firstName: verifiedUser.firstName,
+                lastName: verifiedUser.lastName,
+                email: verifiedUser.email,
+                picture: verifiedUser.picture,
+                access_token: accessToken,
+            }
+        });
 
     } catch (error){
         next(error);

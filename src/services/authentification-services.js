@@ -1,6 +1,7 @@
 //import packages
 import createHttpError from "http-errors";
 import validator from "validator";
+import bcrypt from "bcrypt";
 
 //import UserModel
 import { UserModel } from "../models/user-model.js"
@@ -62,3 +63,19 @@ export const createUserAndAddToDB = async (userData) => {
 
     return user;
 };
+
+export const signInUser = async (email, password) => {
+    const foundUser = await UserModel.findOne({email: email});
+
+    if(!foundUser) throw createHttpError.BadRequest("User with the specified email does not exist");
+
+    const hashedPassword = foundUser.password;
+
+    const verifiedPassword = await bcrypt.compare(password, hashedPassword);
+
+    if(verifiedPassword){
+        // console.log(foundUser);
+        return foundUser;
+    };
+
+}
