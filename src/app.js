@@ -8,6 +8,12 @@ import compression from "compression"; // compresses response bodies for all inc
 import cors from "cors"; // this restricts who can access the server
 import createHttpError from "http-errors";
 
+import path from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url); // get resolved path to this current file
+const __dirname = path.dirname(__filename); // get full directory path that contains this file
+console.log(__dirname);
+
 //import aggregated routes from the index route
 import routes from "./routes/index.js"
 
@@ -23,7 +29,9 @@ if(process.env.NODE_ENV !== "production"){
 };
 
 //use helmet package
-app.use(helmet());
+app.use(helmet.crossOriginResourcePolicy({
+    policy: "cross-origin",
+}));
 
 //parse JSON request body
 app.use(express.json());
@@ -43,11 +51,21 @@ app.use(cookieParser());
 app.use(compression());
 
 //cors middelware
-app.use(cors());
+app.use(cors({
+    credentials: true,
+    origin: "http://localhost:5173",
+}));
 
+//middleware to use images downloaded and saved to our photo-uploads folder
+app.use("/photo-uploads", express.static(path.join(__dirname, "/photo-uploads")));
 
 //middleware to define our API endpoints
 app.use("/api/v1", routes);
+//final result(s) for auth routes
+//http://localhost:5000/api/v1/auth/register
+//http://localhost:5000/api/v1/auth/login
+//http://localhost:5000/api/v1/auth/logout
+//http://localhost:5000/api/v1/auth/refreshToken
 
 //  *** error handling middleware ***   //
 app.use(async (req, res, next) => {
