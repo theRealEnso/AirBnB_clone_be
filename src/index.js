@@ -2,6 +2,8 @@ import app from "./app.js";
 import logger from "./configs/winston-logger.js";
 import mongoose from "mongoose"
 
+import { cronCleanup } from "./schedules/cronJob.js";
+
 //env variables
 const PORT = process.env.port || 5000;
 const {DATABASE_URL} = process.env;
@@ -28,6 +30,8 @@ const connectToDB = async () => {
 
 connectToDB();
 
+//run cron job clean up
+cronCleanup();
 
 //starting the server
 let server;

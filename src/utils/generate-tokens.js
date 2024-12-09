@@ -14,6 +14,14 @@ export const generateToken = async (payload, secretKey, expiryTime) => {
 };
 
 // jwt.verify(token, secretOrPublicKey, [options, callback])
-export const verifyToken = async () => {
-
-}
+export const verifyToken = async (token, secretKey) => {
+    return new Promise((resolve, reject) => {
+        jwt.verify(token, secretKey, (error, decodedUser) => {
+            if(error){
+                reject(error);
+            } else {
+                resolve(decodedUser)
+            }
+        });
+    });
+};

@@ -56,8 +56,9 @@ app.use(cors({
     origin: "http://localhost:5173",
 }));
 
-//middleware to use images downloaded and saved to our photo-uploads folder
+//middleware to use images downloaded and saved to our photo-uploads and temporary-photos folder
 app.use("/photo-uploads", express.static(path.join(__dirname, "/photo-uploads")));
+app.use("/temporary-photos", express.static(path.join(__dirname, "/temporary-photos")));
 
 //middleware to define our API endpoints
 app.use("/api/v1", routes);
