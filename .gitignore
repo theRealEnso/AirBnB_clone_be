@@ -1,2 +1,4 @@
 node_modules
 .env
+temporary-photos
+photo-uploads
