@@ -15,7 +15,7 @@ import { TemporaryPhotosModel } from "../models/temporary-photos-model.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 //import main function for endpoint(s)
-import { uploadImageFromLinks, createPlace } from "../controllers/places-controller.js";
+import { uploadImageFromLinks, createPlace, getPlaces, getPlaceDetails, updatePlace } from "../controllers/places-controller.js";
 
 //import utility/helper functions
 import { computeFilehash, generateRandomId } from "../services/places-services.js";
@@ -26,7 +26,7 @@ const __dirname = path.dirname(__filename);
 
 //configure multer
 const upload = multer({
-    dest: path.join(__dirname, "../temporary-photos/"), // Upload destination
+    dest: path.join(__dirname, "../photo-uploads/"), // Upload destination
   });
 
 const router = express.Router();
@@ -72,7 +72,7 @@ router.route("/upload-to-temporary").post(trimRequest.all, authMiddleware, uploa
                 fs.renameSync(path, newPath);
                 
                 //just need to store the file name with the extension in the array, not the string value of the entire path of the file
-                const photoName = newPath.replace(`${process.env.PATH_TO_TEMPORARY_PHOTOS}`, "");
+                const photoName = newPath.replace(`${process.env.PATH_TO_PHOTO_UPLOADS}`, "");
                 uploadedPhotoNames.push({
                     tempId: temporary_id,
                     photo: photoName,
@@ -92,5 +92,11 @@ router.route("/upload-to-temporary").post(trimRequest.all, authMiddleware, uploa
 });
 
 router.route("/create-new-place").post(trimRequest.all, authMiddleware, createPlace);
+
+router.route("/update-place").put(trimRequest.all, authMiddleware, updatePlace);
+
+router.route("/get-all-places").get(trimRequest.all, authMiddleware, getPlaces);
+
+router.route("/:placeId").get(trimRequest.all, authMiddleware, getPlaceDetails);
 
 export default router;

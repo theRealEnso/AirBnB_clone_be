@@ -10,7 +10,7 @@ import { fileURLToPath } from "url";
 import fs from "fs";
 
 //import utility/helper functions
-import { verifyLink, computeFilehash, generateRandomId } from "../services/places-services.js";
+import { verifyLink, computeFilehash, generateRandomId, getAllPlaces, getPlace } from "../services/places-services.js";
 
 const __filename = fileURLToPath(import.meta.url); // get resolved path to this current file
 const __dirname = path.dirname(__filename); //get full directory path
@@ -23,11 +23,11 @@ export const uploadImageFromLinks = async (req, res, next) => {
         const jpgVerifiedLink = verifyLink(link);
         const photoName = "photo" + Date.now() + ".jpg";
 
-        const tempFilePath = path.join(__dirname, "../temporary-photos/", photoName);
+        const tempFilePath = path.join(__dirname, "../photo-uploads/", photoName);
 
         await download.image({
             url: `${jpgVerifiedLink}`,
-            dest: path.join(__dirname, "../temporary-photos/") + photoName,
+            dest: path.join(__dirname, "../photo-uploads/") + photoName,
         });
 
         //compute file hash of the downloaded image
@@ -63,12 +63,13 @@ export const uploadImageFromLinks = async (req, res, next) => {
 
 export const createPlace = async (req, res, next) => {
     try {
-        const {title, address, photos, description, perks, extraInfo, checkIn, checkOut, maxGuests} = req.body;
-        if(!title || !address || !photos || !description || !perks || !extraInfo || !checkIn || !checkOut || !maxGuests){
+        const {owner, title, address, photos, description, perks, extraInfo, checkIn, checkOut, maxGuests,} = req.body;
+        if(!owner || !title || !address || !photos || !description || !perks || !extraInfo || !checkIn || !checkOut || !maxGuests){
             throw createHttpError.BadRequest("Missing required fields");
         }
 
         const newPlace = await PlacesModel.create({
+            owner,
             title,
             address,
             photos,
@@ -83,6 +84,7 @@ export const createPlace = async (req, res, next) => {
         res.json({
             message: "Place successfully created!",
             place: {
+                owner: newPlace.owner,
                 title: newPlace.title,
                 address: newPlace.address,
                 photos: newPlace.photos,
@@ -91,10 +93,82 @@ export const createPlace = async (req, res, next) => {
                 extraInfo: newPlace.extraInfo,
                 checkInTime: newPlace.checkInTime,
                 checkOutTime: newPlace.checkOutTime,
-                maxGuests: newPlace.maxGuests
+                maxGuests: newPlace.maxGuests,
             }
         })
     } catch(error) {
         next(error);
     }
+};
+
+export const updatePlace = async (req, res, next) => {
+    try {
+
+        const userId = req.user.id;
+
+        const {owner, title, address, photos, description, perks, extraInfo, checkIn, checkOut, maxGuests, _id} = req.body;
+        if(!owner || !title || !address || !photos || !description || !perks || !extraInfo || !checkIn || !checkOut || !maxGuests || !_id){
+            throw createHttpError.BadRequest("Missing required fields");
+        }
+
+        console.log(owner)
+        console.log(userId);
+        
+        if(userId === owner){
+            const updatedPlace = await PlacesModel.findByIdAndUpdate(_id, {
+                owner,
+                title,
+                address,
+                photos,
+                description,
+                perks,
+                extraInfo,
+                checkIn,
+                checkOut,
+                maxGuests,
+            });
+
+            res.json({
+                message: "Place successfully updated!",
+                place: {
+                    owner: updatedPlace.owner,
+                    title: updatedPlace.title,
+                    address: updatedPlace.address,
+                    photos: updatedPlace.photos,
+                    description: updatedPlace.description,
+                    perks: updatedPlace.perks,
+                    extraInfo: updatedPlace.extraInfo,
+                    checkInTime: updatedPlace.checkInTime,
+                    checkOutTime: updatedPlace.checkOutTime,
+                    maxGuests: updatedPlace.maxGuests,
+                }
+            });
+        }
+
+    } catch(error) {
+        next(error);
+    }
+}
+
+export const getPlaces = async (req, res, next) => {
+    try {
+        const userId = req.user.id
+        const userPlaces = await getAllPlaces(userId);
+
+        res.json(userPlaces);
+    } catch(error) {
+        next(error);
+    }
+}
+
+export const getPlaceDetails = async (req, res, next) => {
+    try {
+        const {placeId} = req.params;
+
+        const place = await getPlace(placeId);
+
+        res.json(place);
+   } catch(error){
+    next(error)
+   } 
 };
