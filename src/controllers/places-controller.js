@@ -20,13 +20,13 @@ console.log(__dirname);
 export const uploadImageFromLinks = async (req, res, next) => {
     try {
         const {link} = req.body;
-        const jpgVerifiedLink = verifyLink(link);
+        const verifiedLink = verifyLink(link);
         const photoName = "photo" + Date.now() + ".jpg";
 
         const tempFilePath = path.join(__dirname, "../photo-uploads/", photoName);
 
         await download.image({
-            url: `${jpgVerifiedLink}`,
+            url: `${verifiedLink}`,
             dest: path.join(__dirname, "../photo-uploads/") + photoName,
         });
 
@@ -48,7 +48,6 @@ export const uploadImageFromLinks = async (req, res, next) => {
             res.json({
                 tempId: temporary_id,
                 photo: photoName,
-                message: "Image from link created successfully!"
             });
 
         } else {

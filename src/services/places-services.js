@@ -7,12 +7,12 @@ import fs from "fs"
 import { PlacesModel } from "../models/places-model.js";
 
 export const verifyLink = (link) => {
-    const splitLink = link.split(".jpg");
+    const splitLink = link.split(".");
 
-    if(splitLink.length > 0 && splitLink[splitLink.length - 1] === ""){
+    if(splitLink.includes("jpg") || splitLink.includes("png") || splitLink.includes("webp")){
         return link;
     } else {
-        throw createHttpError.BadRequest("The provided url is not a .jpg url. Only .jpg extensions are accepted");
+        throw createHttpError.BadRequest("The provided url is not a .jpg, .png, or webp url. Only .jpg, .png, or .webp extensions are accepted");
     }
 };
 

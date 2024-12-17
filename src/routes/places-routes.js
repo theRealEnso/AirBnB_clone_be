@@ -33,7 +33,7 @@ const router = express.Router();
 
 router.route("/upload-by-link").post(trimRequest.all, authMiddleware, uploadImageFromLinks);
 
-router.route("/upload-to-temporary").post(trimRequest.all, authMiddleware, upload.array("photos", 100), async (req, res, next) => {
+router.route("/upload-to-photo-uploads").post(trimRequest.all, authMiddleware, upload.array("photos", 100), async (req, res, next) => {
     //multer adds both a `body` object and a `file` or `files` object to the request object.
     //the body contains the values of the text fields of the form
     //the file or files object contains the files uploaded via the form. Will generate data in an object containing original file data
@@ -76,7 +76,6 @@ router.route("/upload-to-temporary").post(trimRequest.all, authMiddleware, uploa
                 uploadedPhotoNames.push({
                     tempId: temporary_id,
                     photo: photoName,
-                    message: "File uploaded successfully!"
                 });
                 
             } else { //otherwise, remove the duplicate photo

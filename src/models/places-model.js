@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const {ObjectId} = mongoose.Schema.Types;
+const {ObjectId,} = mongoose.Schema.Types;
 
 const placesSchema = new mongoose.Schema({
     owner: {
@@ -33,11 +33,11 @@ const placesSchema = new mongoose.Schema({
         required: true
     },
     checkIn: {
-        type: Number || String,
+        type: [String, Number], // can be string or a number
         required: true,
     },
     checkOut: {
-        type: Number || String,
+        type: [String, Number], // can be a string or a number
         required: true,
     },
     maxGuests: {
