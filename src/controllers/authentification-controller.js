@@ -60,7 +60,7 @@ export const register = async (req, res, next) => {
 export const login = async (req, res, next) => {
     try {
         const {email, password} = req.body;
-        const newUser = await signInUser(email, password);
+        const verifiedUser = await signInUser(email, password);
 
         console.log(verifiedUser);
 
