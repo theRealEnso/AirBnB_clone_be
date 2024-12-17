@@ -43,7 +43,7 @@ export const register = async (req, res, next) => {
         res.json({
             message: "Successfully registered the user!",
             user: {
-                id: verifiedUser._id,
+                id: newUser._id,
                 firstName: newUser.firstName,
                 lastName: newUser.lastName,
                 email: newUser.email,
@@ -60,7 +60,7 @@ export const register = async (req, res, next) => {
 export const login = async (req, res, next) => {
     try {
         const {email, password} = req.body;
-        const verifiedUser = await signInUser(email, password);
+        const newUser = await signInUser(email, password);
 
         console.log(verifiedUser);
 

@@ -63,7 +63,17 @@ export const uploadImageFromLinks = async (req, res, next) => {
 export const createPlace = async (req, res, next) => {
     try {
         const {owner, title, address, photos, description, perks, extraInfo, checkIn, checkOut, maxGuests,} = req.body;
-        if(!owner || !title || !address || !photos || !description || !perks || !extraInfo || !checkIn || !checkOut || !maxGuests){
+        if(
+            !owner || 
+            !title || 
+            !address || 
+            !Array.isArray(photos) || photos.length === 0 || 
+            !description || 
+            !Array.isArray(perks) || perks.length === 0 || 
+            !extraInfo || 
+            !checkIn || 
+            !checkOut || 
+            !maxGuests){
             throw createHttpError.BadRequest("Missing required fields");
         }
 
@@ -151,7 +161,8 @@ export const updatePlace = async (req, res, next) => {
 
 export const getPlaces = async (req, res, next) => {
     try {
-        const userId = req.user.id
+        const userId = req.user.id;
+        console.log(userId);
         const userPlaces = await getAllPlaces(userId);
 
         res.json(userPlaces);
