@@ -31,7 +31,17 @@ export const generateRandomId = () => {
     return crypto.randomUUID();
 };
 
-export const getAllPlaces = async (userId) => {
+export const retrievePlaces = async () => {
+    const allPlaces = await PlacesModel.find({});
+
+    if(!allPlaces || allPlaces.length === 0){
+        throw createHttpError[404]("No places found!");
+    };
+
+    return allPlaces;
+};
+
+export const getAllUserPlaces = async (userId) => {
     const foundPlaces = await PlacesModel.find({owner: userId});
 
     if(!foundPlaces){

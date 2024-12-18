@@ -15,7 +15,7 @@ import { TemporaryPhotosModel } from "../models/temporary-photos-model.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 //import main function for endpoint(s)
-import { uploadImageFromLinks, createPlace, getPlaces, getPlaceDetails, updatePlace } from "../controllers/places-controller.js";
+import { uploadImageFromLinks, createPlace, getPlaces, getPlaceDetails, updatePlace, fetchAllPlaces } from "../controllers/places-controller.js";
 
 //import utility/helper functions
 import { computeFilehash, generateRandomId } from "../services/places-services.js";
@@ -89,6 +89,8 @@ router.route("/upload-to-photo-uploads").post(trimRequest.all, authMiddleware, u
         next(error);
     }
 });
+
+router.route("/view").get(trimRequest.all, fetchAllPlaces);
 
 router.route("/create-new-place").post(trimRequest.all, authMiddleware, createPlace);
 

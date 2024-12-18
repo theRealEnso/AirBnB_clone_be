@@ -10,7 +10,7 @@ import { fileURLToPath } from "url";
 import fs from "fs";
 
 //import utility/helper functions
-import { verifyLink, computeFilehash, generateRandomId, getAllPlaces, getPlace } from "../services/places-services.js";
+import { verifyLink, computeFilehash, generateRandomId, getAllUserPlaces, getPlace, retrievePlaces } from "../services/places-services.js";
 
 const __filename = fileURLToPath(import.meta.url); // get resolved path to this current file
 const __dirname = path.dirname(__filename); //get full directory path
@@ -60,11 +60,21 @@ export const uploadImageFromLinks = async (req, res, next) => {
     }
 };
 
+export const fetchAllPlaces = async (req, res, next) => {
+    try {
+        const places = await retrievePlaces();
+        res.json(places);
+    } catch(error) {
+        next(error)
+    };
+};
+
 export const createPlace = async (req, res, next) => {
     try {
-        const {owner, title, address, photos, description, perks, extraInfo, checkIn, checkOut, maxGuests,} = req.body;
+        const {owner, price, title, address, photos, description, perks, extraInfo, checkIn, checkOut, maxGuests,} = req.body;
         if(
-            !owner || 
+            !owner ||
+            !price ||  
             !title || 
             !address || 
             !Array.isArray(photos) || photos.length === 0 || 
@@ -79,6 +89,7 @@ export const createPlace = async (req, res, next) => {
 
         const newPlace = await PlacesModel.create({
             owner,
+            price,
             title,
             address,
             photos,
@@ -94,6 +105,7 @@ export const createPlace = async (req, res, next) => {
             message: "Place successfully created!",
             place: {
                 owner: newPlace.owner,
+                price: newPlace.price,
                 title: newPlace.title,
                 address: newPlace.address,
                 photos: newPlace.photos,
@@ -115,17 +127,18 @@ export const updatePlace = async (req, res, next) => {
 
         const userId = req.user.id;
 
-        const {owner, title, address, photos, description, perks, extraInfo, checkIn, checkOut, maxGuests, _id} = req.body;
-        if(!owner || !title || !address || !photos || !description || !perks || !extraInfo || !checkIn || !checkOut || !maxGuests || !_id){
+        const {owner, price, title, address, photos, description, perks, extraInfo, checkIn, checkOut, maxGuests, _id} = req.body;
+        if(!owner || !price || !title || !address || !photos || !description || !perks || !extraInfo || !checkIn || !checkOut || !maxGuests || !_id){
             throw createHttpError.BadRequest("Missing required fields");
         }
 
-        console.log(owner)
-        console.log(userId);
+        // console.log(owner)
+        // console.log(userId);
         
         if(userId === owner){
             const updatedPlace = await PlacesModel.findByIdAndUpdate(_id, {
                 owner,
+                price,
                 title,
                 address,
                 photos,
@@ -141,6 +154,7 @@ export const updatePlace = async (req, res, next) => {
                 message: "Place successfully updated!",
                 place: {
                     owner: updatedPlace.owner,
+                    price: updatedPlace.price,
                     title: updatedPlace.title,
                     address: updatedPlace.address,
                     photos: updatedPlace.photos,
@@ -152,18 +166,20 @@ export const updatePlace = async (req, res, next) => {
                     maxGuests: updatedPlace.maxGuests,
                 }
             });
-        }
+        } else {
+            throw createHttpError.Unauthorized("Only the owner of the place can make edits");
+        };
 
     } catch(error) {
         next(error);
-    }
-}
+    };
+};
 
 export const getPlaces = async (req, res, next) => {
     try {
         const userId = req.user.id;
         console.log(userId);
-        const userPlaces = await getAllPlaces(userId);
+        const userPlaces = await getAllUserPlaces(userId);
 
         res.json(userPlaces);
     } catch(error) {

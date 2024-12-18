@@ -6,6 +6,12 @@ const placesSchema = new mongoose.Schema({
         type: ObjectId,
         ref: "UserModel"
     },
+
+    price: {
+        type: Number,
+        required: true,
+    }, 
+
     title: {
         type: String,
         required: true,
